@@ -10,6 +10,9 @@ class IndexAction(Action):
     def __repr__(self):
         return str(self.index)
 
+    def __eq__(self, other):
+        return self.index == other.index
+
 
 class RandomPlayer(Player):
     def select_action(self, actions, game):

@@ -25,19 +25,27 @@ class AlternateTurnGame(Game):
         self.reset()
 
     def reset(self):
-        self.current_player = PlayerIndex(0)
+        self.current_player = 0
         self.finalized = (False, None)
         self.done, self.winner = False, None
         self.last_actions = []
         self.board.reset()
 
     def next_player(self):
-        self.current_player = PlayerIndex((self.current_player+1)%self.n)
+        self.current_player = (self.current_player+1)%self.n
 
     def random_outcome(self) -> Winner:
         game_copy = deepcopy(self)
         players = [RandomPlayer()]*self.n
         return game_copy.play(players)
+
+    def next_state(self, action):
+        self.board.execute_action(self.current_player, action)
+        self.last_actions += [action]
+        if len(self.last_actions) > self.n:
+            self.last_actions = self.last_actions[1:]
+        self.next_player()
+        self.done, self.winner = self.board.finalized(self.current_player)
 
     # mb check if len(players) == self.n
     def play(self, players: List[Player], track: bool = False):
@@ -51,21 +59,17 @@ class AlternateTurnGame(Game):
             if track:
                 knot = (deepcopy(self.board), self.current_player, action)
                 history.l.append(knot)
-            self.board.execute_action(self.current_player, action)
-            self.last_actions += [action]
-            if len(self.last_actions) > self.n:
-                self.last_actions = self.last_actions[1:]
-            self.next_player()
-            self.done, self.winner = self.board.finalized(self.current_player)
+            self.next_state(action)
         if track:
             return self.winner, history
         else:
             return self.winner
 
     def play_games(self, n: int, players: List[Player]):
-        statistics = {PlayerIndex(i): 0 for i in range(self.n)}
+        statistics = {i: 0 for i in range(self.n)}
         statistics[None] = 0
-        for _i in range(n):
+        for i in range(n):
+            print("playing game", i)
             self.reset()
             winner = self.play(players)
             statistics[winner] += 1

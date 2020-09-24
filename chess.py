@@ -210,7 +210,7 @@ class ChessState(BoardState):
                     if v*v2 < 0:
                         poss_ending_cols += [ending_pos[1]]
                     elif v*v2 == 0 and (ending_pos[0]-direction, ending_pos[1]) == self.en_passant_pawn_position:
-                        r += [EnPassant(starting_field, ending_field, state)]
+                        r += [EnPassant(starting_pos, ending_pos, self)]
                 for j in poss_ending_cols:
                     if promotion:
                         for value in [knight, bishop, rook, queen]:
